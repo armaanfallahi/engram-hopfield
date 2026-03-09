@@ -1,0 +1,16 @@
+[project]
+name = "engram"
+version = "0.1.0"
+description = "Hopfield network models of fear and extinction engrams"
+authors = [{name="Armaan"}]
+
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "pandas",
+    "tqdm"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
