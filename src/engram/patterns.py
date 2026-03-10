@@ -119,3 +119,56 @@ def generate_cs_input(
     cued_indices = rng.choice(active_indices, size=n_cued, replace=False)
     cs_input[cued_indices] = 1
     return cs_input
+
+def generate_noisy_cs_input(
+    pattern: np.ndarray,
+    cue_fraction: float,
+    background_fraction: float,
+    rng: np.random.Generator | None = None,
+) -> np.ndarray:
+    """
+    Generate a CS-like input with:
+    - partial overlap onto true engram neurons
+    - background activation of non-engram neurons
+
+    Parameters
+    ----------
+    pattern : np.ndarray
+        Stored binary engram pattern.
+    cue_fraction : float
+        Fraction of active engram neurons included in the cue.
+    background_fraction : float
+        Fraction of inactive/non-engram neurons also activated.
+    rng : np.random.Generator | None
+        Random number generator.
+
+    Returns
+    -------
+    np.ndarray
+        Binary cue vector.
+    """
+    if rng is None:
+        rng = np.random.default_rng()
+
+    if not (0 <= cue_fraction <= 1):
+        raise ValueError("cue_fraction must be between 0 and 1")
+    if not (0 <= background_fraction <= 1):
+        raise ValueError("background_fraction must be between 0 and 1")
+
+    cs_input = np.zeros_like(pattern)
+
+    engram_idx = np.where(pattern == 1)[0]
+    non_engram_idx = np.where(pattern == 0)[0]
+
+    n_cued = int(round(len(engram_idx) * cue_fraction))
+    n_background = int(round(len(non_engram_idx) * background_fraction))
+
+    if n_cued > 0:
+        cued_idx = rng.choice(engram_idx, size=n_cued, replace=False)
+        cs_input[cued_idx] = 1
+
+    if n_background > 0:
+        bg_idx = rng.choice(non_engram_idx, size=n_background, replace=False)
+        cs_input[bg_idx] = 1
+
+    return cs_input
