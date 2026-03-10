@@ -41,3 +41,38 @@ def retrieval_success(
     """
     ov = pattern_overlap(state, pattern)
     return int(ov >= threshold)
+
+import numpy as np
+
+
+def pattern_overlap(state: np.ndarray, pattern: np.ndarray) -> float:
+    if state.shape != pattern.shape:
+        raise ValueError("state and pattern must have the same shape")
+
+    n_pattern_active = pattern.sum()
+    if n_pattern_active == 0:
+        raise ValueError("pattern has no active neurons")
+
+    return np.sum((state == 1) & (pattern == 1)) / n_pattern_active
+
+
+def retrieval_success(
+    state: np.ndarray,
+    pattern: np.ndarray,
+    threshold: float = 0.9,
+) -> int:
+    return int(pattern_overlap(state, pattern) >= threshold)
+
+
+def activity_fraction(state: np.ndarray) -> float:
+    """
+    Fraction of neurons active in the current network state.
+    """
+    return float(np.mean(state))
+
+
+def convergence_steps(trajectory: list[np.ndarray]) -> int:
+    """
+    Number of update steps taken before convergence.
+    """
+    return len(trajectory) - 1
