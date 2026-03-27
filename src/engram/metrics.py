@@ -42,26 +42,16 @@ def retrieval_success(
     ov = pattern_overlap(state, pattern)
     return int(ov >= threshold)
 
-import numpy as np
 
+def all_pattern_overlaps(state: np.ndarray, patterns: np.ndarray) -> np.ndarray:
+    """
+    Overlap of `state` with each row of `patterns`.
 
-def pattern_overlap(state: np.ndarray, pattern: np.ndarray) -> float:
-    if state.shape != pattern.shape:
-        raise ValueError("state and pattern must have the same shape")
-
-    n_pattern_active = pattern.sum()
-    if n_pattern_active == 0:
-        raise ValueError("pattern has no active neurons")
-
-    return np.sum((state == 1) & (pattern == 1)) / n_pattern_active
-
-
-def retrieval_success(
-    state: np.ndarray,
-    pattern: np.ndarray,
-    threshold: float = 0.9,
-) -> int:
-    return int(pattern_overlap(state, pattern) >= threshold)
+    Entry mu is pattern_overlap(state, patterns[mu]).
+    """
+    return np.array(
+        [pattern_overlap(state, patterns[mu]) for mu in range(patterns.shape[0])]
+    )
 
 
 def activity_fraction(state: np.ndarray) -> float:
