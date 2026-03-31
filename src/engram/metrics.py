@@ -66,3 +66,16 @@ def convergence_steps(trajectory: list[np.ndarray]) -> int:
     Number of update steps taken before convergence.
     """
     return len(trajectory) - 1
+
+
+def weight_matrix_difference(W1: np.ndarray, W2: np.ndarray) -> float:
+    """
+    Compute the Frobenius norm of (W1 - W2), normalized by the
+    Frobenius norm of W1.
+
+    Returns a scalar float. Used to verify that sequential and
+    batch storage produce equivalent weight matrices.
+    """
+    return float(
+        np.linalg.norm(W1 - W2, ord="fro") / np.linalg.norm(W1, ord="fro")
+    )
