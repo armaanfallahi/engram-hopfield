@@ -174,6 +174,47 @@ class HopfieldNetwork:
 
         return state, trajectory, energies
 
+    def run_with_bias(
+        self,
+        initial_state: np.ndarray,
+        external_input: np.ndarray | None = None,
+        beta: float = 0.0,
+        theta: float = 0.0,
+        excitability_bias: np.ndarray | None = None,
+        max_steps: int = 30,
+    ) -> tuple[np.ndarray, list[np.ndarray], int]:
+        """
+        Run synchronous threshold dynamics with optional per-neuron bias.
+
+        Local field: h = W @ s + beta * external_input + excitability_bias
+        Update rule: s_i = 1 if h_i > theta else 0
+
+        Does NOT enforce top-k sparsity during dynamics.
+        Returns: final_state, trajectory (list of states), n_steps
+        """
+        state = initial_state.copy().astype(float)
+        trajectory = [state.copy()]
+
+        if excitability_bias is None:
+            bias = np.zeros(self.n)
+        else:
+            bias = excitability_bias
+
+        if external_input is None:
+            ext = np.zeros(self.n)
+        else:
+            ext = external_input
+
+        for _ in range(max_steps):
+            h = self.W @ state + beta * ext + bias
+            new_state = (h > theta).astype(float)
+            trajectory.append(new_state.copy())
+            if np.array_equal(new_state, state):
+                break
+            state = new_state
+
+        return state, trajectory, len(trajectory) - 1
+
     def _run_synchronous_topk(
         self,
         initial_state: np.ndarray,
